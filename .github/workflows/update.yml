@@ -1,0 +1,71 @@
+name: 每日更新规则
+
+# 为什么放在 GitHub 跑：
+#   规则更新是纯粹的「拉上游 → 打补丁 → 提交」，不需要本机参与。
+#   放 Actions 里跑，本机关机也照样更新。
+
+on:
+  schedule:
+    # 上游 johnshall 每天 08:00(北京) 更新 → 我们 08:40 跟进
+    # GitHub 用的是 UTC，08:40 北京 = 00:40 UTC
+    - cron: '40 0 * * *'
+  workflow_dispatch: # 支持手动触发
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-rules
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 拉上游 + 打补丁
+        run: python3 scripts/build.py
+
+      - name: 有变化才提交（amend + force push，历史不增长）
+        id: commit
+        run: |
+          set -e
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # 先 add 再比对 index：
+          # 不能用 `git diff --quiet` —— 它看不见「新增的未跟踪文件」，
+          # 会让「文件是新生成的」这种情况被误判成「无变化」而静默跳过提交。
+          git add -A
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "### ✅ 规则已是最新，无需提交" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          git commit --amend --no-edit --date="$(date -R)"
+          git push --force origin HEAD:main
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+          echo "### 🔄 规则已更新并推送" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          git show --stat --oneline HEAD | head -20 >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      # jsdelivr 对分支引用(@main)有最长 12 小时缓存。
+      # 不主动清缓存的话，手机拉到的可能是昨天的旧规则 —— 这里推完就清。
+      - name: 清除 jsdelivr 缓存（保证手机立刻拿到新规则）
+        if: steps.commit.outputs.changed == 'true'
+        run: |
+          set -e
+          for f in sr-lazy.conf sr-banlist-patched.conf sr-custom.list; do
+            echo "--- purge $f"
+            curl -sS --max-time 60 \
+              "https://purge.jsdelivr.net/gh/abclq/shadowrocket-rules@main/$f" \
+              | head -c 500
+            echo
+          done
+          echo "### 🧹 jsdelivr 缓存已清除" >> "$GITHUB_STEP_SUMMARY"
