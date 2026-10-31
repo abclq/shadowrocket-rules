@@ -1,0 +1,76 @@
+# Shadowrocket 补充规则集
+# 作者：abclq   维护：自动生成
+# ⚠️ 本文件是【规则集】，不是配置文件 —— 当订阅加进小火箭「配置」页会失败。
+#    正确用法：在配置的 [Rule] 段里引用（sr-lazy.conf 已经引用了，无需手动加）：
+#   RULE-SET,https://gcore.jsdelivr.net/gh/abclq/shadowrocket-rules@main/sr-custom.list,PROXY
+#
+# 本文件解决的问题：
+#   主流公共规则库（GFWList / blackmatrix7 / Johnshall）都还没收录 Hark 等新 App 的域名，
+#   导致它们在「黑名单」模式下落到 FINAL,direct 直连 → 被 Cloudflare 403 → 登录失败。
+
+# ===== Hark AI 助手（harklabs）=====
+DOMAIN-SUFFIX,hark.com
+DOMAIN-SUFFIX,harklabs.com
+DOMAIN-KEYWORD,harklabs
+
+# ===== Meta / Muse / Facebook / Instagram =====
+DOMAIN-SUFFIX,muse.ai
+DOMAIN-SUFFIX,meta.com
+DOMAIN-SUFFIX,fb.com
+DOMAIN-SUFFIX,fbsbx.com
+DOMAIN-SUFFIX,fbcdn.net
+DOMAIN-SUFFIX,messenger.com
+DOMAIN-SUFFIX,cdninstagram.com
+
+# ===== 其它常见 AI 服务（防漏）=====
+DOMAIN-SUFFIX,claude.ai
+DOMAIN-SUFFIX,anthropic.com
+DOMAIN-SUFFIX,perplexity.ai
+DOMAIN-SUFFIX,grok.com
+DOMAIN-SUFFIX,x.ai
+
+# ===== 红果短剧实测补漏（2026-10-14 16:46）=====
+# 来源：红果短剧 3 小时抓包逐条比对规则库，16 条真漏
+DOMAIN-SUFFIX,comfylink.com,REJECT
+DOMAIN-SUFFIX,ndcpp.com,REJECT
+DOMAIN-SUFFIX,abtest3-misc-hl.zijieapi.com,REJECT
+DOMAIN-SUFFIX,thanos.zijieapi.com,REJECT
+DOMAIN-SUFFIX,mon.zijieapi.com,REJECT
+DOMAIN-SUFFIX,timon.zijieapi.com,REJECT
+DOMAIN-SUFFIX,feedback-c.zijieapi.com,REJECT
+DOMAIN-SUFFIX,tracker.xiaomixiaoai.com,REJECT
+DOMAIN-SUFFIX,ads3-normal-lf.zijieapi.com,REJECT
+DOMAIN-SUFFIX,ads5-normal-lf.zijieapi.com,REJECT
+DOMAIN-SUFFIX,ad-sign.byteimg.com,REJECT
+DOMAIN-SUFFIX,dig.bdurl.net,REJECT
+DOMAIN-SUFFIX,aeventlog.beacon.qq.com,REJECT
+DOMAIN-SUFFIX,h.trace.qq.com,REJECT
+DOMAIN-SUFFIX,data.mistat.xiaomi.com,REJECT
+
+# ===== 合并原 sr-adblock-supplement.list 的孤儿规则 =====
+DOMAIN-SUFFIX,qrstuvwxyzab.com,REJECT
+DOMAIN-SUFFIX,wuchuyun.com,REJECT
+DOMAIN-SUFFIX,xinqiucc.com,REJECT
+DOMAIN-SUFFIX,ydycdn.com,REJECT
+DOMAIN-SUFFIX,log5-applog-lf.fqnovel.com,REJECT
+DOMAIN-SUFFIX,rtlog5-applog-lf.fqnovel.com,REJECT
+DOMAIN-SUFFIX,log3-applog-lf.fqnovel.com,REJECT
+DOMAIN-SUFFIX,rtlog3-applog-lf.fqnovel.com,REJECT
+DOMAIN-SUFFIX,mon11-misc-lf.fqnovel.com,REJECT
+DOMAIN-SUFFIX,mon3-misc-lf.fqnovel.com,REJECT
+DOMAIN-SUFFIX,lf3-static.bytednsdoc.com,REJECT
+DOMAIN-SUFFIX,lf3-reading.fqnovelstatic.com,REJECT
+DOMAIN-SUFFIX,lf6-webcastcdn-tos-sign.douyinstatic.com,REJECT
+DOMAIN-SUFFIX,p3-mgsdk-sign.byteimg.com,REJECT
+DOMAIN-SUFFIX,p9-mgsdk-sign.byteimg.com,REJECT
+DOMAIN-SUFFIX,p1-luckycatopen.byteimg.com,REJECT
+# ⚠️ 修正：跨标签的域名 DOMAIN-SUFFIX 匹配不上，改用 DOMAIN-KEYWORD（子串匹配）
+DOMAIN-KEYWORD,applog-lf,REJECT
+DOMAIN-KEYWORD,misc-lf,REJECT
+
+# ===== 随机子域广告 CDN（整后缀拦）=====
+DOMAIN-SUFFIX,ydycdn.com,REJECT
+DOMAIN-SUFFIX,wuchuyun.com,REJECT
+DOMAIN-SUFFIX,xinqiucc.com,REJECT
+DOMAIN-SUFFIX,qrstuvwxyzab.com,REJECT
+DOMAIN-SUFFIX,wmzfylgdsz.com,REJECT
